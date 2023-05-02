@@ -1,1 +1,3 @@
-# lecturebd
+Ce projet est un simple exemple sur comment lire une base de donnée MySql via un programme Cobol (oui oui, du Cobol sur Linux avec MySql).
+
+Ce projet utilise dbpre version 0.4 pour convertir les EXEC SQL en CALL sur des méthodes permettant d'accéder aux données MySql. La base de donnée utilisée - appelé LigueHockey - contient pour les besoins du projet une table appelée Equipe. Trois champs sont lues : le id de l'équipe, le nom de l'équipe ainsi que la ville où la ville joue ses parties à domicile. Un exemple de sortie du programme est : id Equipe : +000000001; Nom Équipe : Nordiques                                         ;Ville : Québec.
