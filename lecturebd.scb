@@ -1,0 +1,113 @@
+      ****************************************************************
+      * Inspiré de https://www.easysoft.com/blog/visual-cobol.html
+      * Visual COBOL -> ODBC -> MySQL example.
+      *
+      * Retourne les enregistrements de la table Equipe de la BD
+      * MySql LigueHockey. Retourne 2 champs de la table.
+      *
+      ****************************************************************
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. lecturbd.
+       DATE-WRITTEN. 2023-01-21.
+      *
+      * Environment division 
+       ENVIRONMENT DIVISION.
+      *
+      * Data division 
+       DATA DIVISION.
+      *
+       FILE SECTION.
+       WORKING-STORAGE SECTION.
+       COPY PGCTBBATWS.
+      *
+       01  PGCTB-VERSION                    PIC  X(38) 
+HISTOR     VALUE '20230430 1.0 INITIAL RELEASE'.
+      *
+      *01  T                                PIC  S9(9) COMP.
+      *
+      * The communication area for the database
+           EXEC SQL 
+              INCLUDE SQLCA  
+           END-EXEC.
+       01 HOSTVARS.
+           05  idEquipe           pic S9(9) comp-4.
+           05  pNomEquipe         pic  x(50).
+           05  pVilleHote         pic  x(50).
+      *
+      *linkage section.
+      *
+      * Procedure division
+       PROCEDURE DIVISION.
+      * 
+           EXEC SQL
+               INCLUDE PGCTBBAT REPLACING 'TTTTNNNB' BY 'lecturbd'.
+           END-EXEC.
+      ******************************************************************
+      *  P G C T B - A C T I O N   S E C T I O N                       *
+      ******************************************************************
+       PGCTB-ACTION SECTION. 
+      *
+           DISPLAY 'In PGCTB-ACTION.'
+      *
+           EXEC SQL
+              DECLARE MONCURSEUR CURSOR FOR
+              SELECT NoEquipe, NomEquipe, Ville
+                INTO :idEquipe, :pNomEquipe, :pVilleHote
+                FROM Equipe
+           END-EXEC.
+      *
+           EVALUATE TRUE
+           WHEN DB-OK
+              CONTINUE
+           WHEN OTHER
+              PERFORM DB-STATUS
+           END-EVALUATE.
+      *
+           EXEC SQL 
+              OPEN MONCURSEUR
+           END-EXEC
+      *
+           EVALUATE TRUE
+           WHEN DB-OK
+              CONTINUE
+           WHEN DB-NOT-FOUND
+              CONTINUE
+           WHEN OTHER
+              PERFORM DB-STATUS
+           END-EVALUATE.
+      *
+           DISPLAY "No Equipe=" idEquipe "; Nom Equipe=" pNomEquipe
+              "; Ville=" pVilleHote.
+      *
+           PERFORM UNTIL NOT DB-OK
+              EXEC SQL
+                 FETCH MONCURSEUR
+                 INTO :idEquipe :pNomEquipe :pVilleHote
+              END-EXEC
+              EVALUATE TRUE
+              WHEN DB-OK
+                  DISPLAY "No Equipe=" idEquipe "; Nom Equipe="
+                  pNomEquipe "; Ville=" pVilleHote
+              WHEN DB-NOT-FOUND
+                 MOVE ZEROES            TO idEquipe
+                 MOVE SPACE             TO pNomEquipe
+                 MOVE SPACE             TO pVilleHote
+              WHEN OTHER
+                 PERFORM DB-STATUS
+              END-EVALUATE
+           END-PERFORM.
+      *
+           EXEC SQL
+              CLOSE MONCURSEUR
+           END-EXEC.
+           EVALUATE TRUE
+           WHEN DB-OK
+               CONTINUE
+           WHEN OTHER
+               PERFORM DB-STATUS
+           END-EVALUATE.
+           DISPLAY '-------------------------------------------'.
+      *
+       PGCTB-ACTION-EXIT.
+           EXIT.
+      *    STOP RUN.
